@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bizim Uygulamamız ❤️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,500&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{min-height:100%;}
+  body{
+    font-family:'Quicksand',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at 20% 15%, #3b1a52 0%, #1a0b2e 45%, #0b0414 100%);
+    background-attachment:fixed;
+    color:#fff;
+    min-height:100dvh;
+    display:flex;
+    overflow-x:hidden;
+    -webkit-tap-highlight-color:transparent;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- UÇAN KALPLER ---------- */
+  #hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+  #hearts span{
+    position:absolute;bottom:-50px;opacity:0;
+    animation:floatUp linear infinite;
+    filter:drop-shadow(0 0 8px rgba(255,107,157,.8));
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(0) scale(.5) rotate(0deg);opacity:0;}
+    12%{opacity:.75;}
+    85%{opacity:.4;}
+    100%{transform:translateY(-115vh) scale(1.15) rotate(45deg);opacity:0;}
+  }
+
+  /* ---------- EKRAN YAPISI ---------- */
+  #app{
+    position:relative;z-index:1;
+    width:100%;max-width:520px;
+    margin:auto;
+    padding:22px 18px;
+  }
+  .screen{display:none;}
+  .screen.active{display:block;animation:screenIn .65s cubic-bezier(.2,.8,.3,1) both;}
+  @keyframes screenIn{
+    from{opacity:0;transform:translateY(28px) scale(.96);filter:blur(6px);}
+    to{opacity:1;transform:none;filter:blur(0);}
+  }
+
+  .card{
+    background:linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:30px;
+    padding:34px 22px;
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    box-shadow:0 28px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.16);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::after{
+    content:'';position:absolute;top:-60%;left:-30%;width:80%;height:200%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);
+    transform:rotate(20deg);pointer-events:none;
+  }
+
+  h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;letter-spacing:.5px;}
+  h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;}
+  .sub{font-size:13.5px;color:rgba(255,255,255,.55);margin-top:8px;letter-spacing:.3px;}
+
+  /* ---------- KİLİT EKRANI ---------- */
+  .lock-heart{
+    font-size:52px;line-height:1;margin-bottom:14px;
+    animation:beat 1.6s ease-in-out infinite;
+    filter:drop-shadow(0 0 22px rgba(255,107,157,.85));
+  }
+  @keyframes beat{
+    0%,100%{transform:scale(1);}
+    15%{transform:scale(1.18);}
+    30%{transform:scale(1);}
+    45%{transform:scale(1.12);}
+  }
+  .pin-wrap{display:flex;gap:12px;justify-content:center;margin:28px 0 10px;}
+  .pin-input{
+    width:58px;height:70px;border-radius:20px;
+    border:1.5px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.06);
+    color:#fff;font-size:28px;font-weight:700;font-family:inherit;
+    text-align:center;outline:none;caret-color:#ff6b9d;
+    transition:transform .25s cubic-bezier(.2,.8,.3,1), border-color .25s, box-shadow .25s, background .25s;
+  }
+  .pin-input:focus{
+    border-color:#ff6b9d;
+    background:rgba(255,107,157,.1);
+    box-shadow:0 0 0 4px rgba(255,107,157,.16), 0 0 26px rgba(255,107,157,.4);
+    transform:translateY(-4px);
+  }
+  .pin-input.filled{border-color:rgba(255,107,157,.65);background:rgba(255,107,157,.08);}
+
+  .error{
+    font-size:13px;color:#ff8fb1;margin-top:14px;
+    opacity:0;transform:translateY(-6px);transition:.35s;height:18px;
+  }
+  .error.show{opacity:1;transform:none;}
+
+  @keyframes shake{
+    10%,90%{transform:translateX(-4px);}
+    20%,80%{transform:translateX(7px);}
+    30%,50%,70%{transform:translateX(-10px);}
+    40%,60%{transform:translateX(10px);}
+  }
+  .shake{animation:shake .55s cubic-bezier(.36,.07,.19,.97) both;}
+
+  @keyframes unlock{
+    0%{transform:scale(1);opacity:1;filter:blur(0);}
+    40%{transform:scale(1.05);opacity:1;filter:blur(0);}
+    100%{transform:scale(.82);opacity:0;filter:blur(14px);}
+  }
+  .unlocking{animation:unlock .65s ease forwards;}
+
+  /* ---------- MENÜ ---------- */
+  .menu-head{text-align:center;margin-bottom:22px;}
+  .menu-head p{font-size:13.5px;color:rgba(255,255,255,.55);margin-top:8px;}
+  .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .menu-card{
+    position:relative;display:flex;flex-direction:column;align-items:center;gap:9px;
+    padding:30px 12px;border-radius:26px;
+    border:1px solid rgba(255,255,255,.12);
+    background:linear-gradient(160deg, rgba(255,255,255,.1), rgba(255,255,255,.03));
+    color:#fff;font-family:inherit;cursor:pointer;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    box-shadow:0 18px 45px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.14);
+    transition:transform .3s cubic-bezier(.2,.8,.3,1), box-shadow .3s, border-color .3s;
+    overflow:hidden;
+  }
+  .menu-card::before{
+    content:'';position:absolute;inset:0;border-radius:26px;
+    background:radial-gradient(circle at 50% 0%, rgba(255,107,157,.35), transparent 70%);
+    opacity:0;transition:.35s;
+  }
+  .menu-card:hover::before,.menu-card:active::before{opacity:1;}
+  .menu-card:hover,.menu-card:active{
+    transform:translateY(-7px) scale(1.03);
+    border-color:rgba(255,107,157,.55);
+    box-shadow:0 24px 55px rgba(255,107,157,.3);
+  }
+  .mc-icon{font-size:40px;line-height:1;filter:drop-shadow(0 0 14px rgba(255,107,157,.7));position:relative;}
+  .mc-title{font-size:19px;font-weight:700;position:relative;}
+  .mc-desc{font-size:11.5px;color:rgba(255,255,255,.55);position:relative;}
+
+  /* ---------- MEKTUP ---------- */
+  .note-card{
+    text-align:left;max-height:82vh;overflow-y:auto;
+    padding:34px 26px 28px;
+    scrollbar-width:thin;scrollbar-color:rgba(255,107,157,.5) transparent;
+  }
+  .note-card::-webkit-scrollbar{width:5px;}
+  .note-card::-webkit-scrollbar-thumb{background:rgba(255,107,157,.5);border-radius:9px;}
+  .note-seal{
+    font-size:40px;text-align:center;margin-bottom:20px;
+    animation:sealIn .8s cubic-bezier(.2,1.4,.4,1) both;
+    filter:drop-shadow(0 0 20px rgba(255,107,157,.9));
+  }
+  @keyframes sealIn{
+    from{opacity:0;transform:scale(.3) rotate(-25deg);}
+    to{opacity:1;transform:none;}
+  }
+  .letter{font-size:15px;line-height:1.85;color:rgba(255,255,255,.9);}
+  .letter .line{opacity:0;animation:lineIn 1s cubic-bezier(.2,.8,.3,1) forwards;margin-bottom:18px;}
+  .letter .line.greet{
+    font-family:'Playfair Display',serif;font-style:italic;font-size:21px;
+    color:#ffb3c8;margin-bottom:16px;
+  }
+  .letter .line.sign{
+    font-family:'Playfair Display',serif;font-style:italic;
+    color:#ffb3c8;text-align:right;margin-top:22px;margin-bottom:0;
+  }
+  @keyframes lineIn{
+    from{opacity:0;transform:translateY(20px);filter:blur(7px);}
+    to{opacity:1;transform:none;filter:blur(0);}
+  }
+
+  .back-btn{
+    display:block;margin:26px auto 0;
+    padding:11px 24px;border-radius:999px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.15);
+    color:rgba(255,255,255,.75);font-family:inherit;
+    font-size:13.5px;font-weight:600;cursor:pointer;transition:.25s;
+  }
+  .back-btn:hover,.back-btn:active{background:rgba(255,107,157,.18);border-color:rgba(255,107,157,.5);color:#fff;}
+
+  /* ---------- POMODORO ---------- */
+  .mode-tabs{
+    display:flex;gap:5px;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:999px;padding:5px;margin-bottom:22px;
+  }
+  .mode-tab{
+    flex:1;padding:9px 4px;border-radius:999px;border:none;background:transparent;
+    color:rgba(255,255,255,.6);font-family:inherit;font-weight:600;
+    font-size:12px;cursor:pointer;transition:.28s;white-space:nowrap;
+  }
+  .mode-tab.active{
+    background:linear-gradient(135deg,#ff6b9d,#a78bfa);
+    color:#fff;box-shadow:0 8px 20px rgba(255,107,157,.35);
+  }
+
+  .timer-wrap{position:relative;display:flex;justify-content:center;align-items:center;margin:4px 0 22px;}
+  .ring{width:100%;max-width:250px;height:auto;transform:rotate(-90deg);display:block;}
+  .ring-bg{fill:none;stroke:rgba(255,255,255,.075);stroke-width:11;}
+  .ring-fg{
+    fill:none;stroke:url(#ringGrad);stroke-width:11;stroke-linecap:round;
+    stroke-dasharray:722.57;stroke-dashoffset:0;
+    transition:stroke-dashoffset .25s linear;
+    filter:drop-shadow(0 0 10px rgba(255,107,157,.65));
+  }
+  .timer-inner{position:absolute;text-align:center;}
+  #timeDisplay{
+    font-size:46px;font-weight:700;letter-spacing:2px;
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 0 26px rgba(255,107,157,.45);
+  }
+  #timerLabel{
+    font-size:12px;color:rgba(255,255,255,.5);
+    margin-top:6px;letter-spacing:1.2px;text-transform:uppercase;
+  }
+
+  .dots{display:flex;gap:11px;justify-content:center;margin-bottom:20px;height:12px;}
+  .note-dot{
+    width:11px;height:11px;border-radius:50%;
+    background:rgba(255,255,255,.13);transition:.45s cubic-bezier(.2,1.4,.4,1);
+  }
+  .note-dot.lit{
+    background:linear-gradient(135deg,#ff6b9d,#a78bfa);
+    box-shadow:0 0 14px rgba(255,107,157,.95);
+    transform:scale(1.35);
+  }
+
+  .pomo-controls{display:flex;gap:12px;align-items:center;}
+  .btn-primary{
+    flex:1;padding:16px;border-radius:999px;border:none;cursor:pointer;
+    font-family:inherit;font-weight:700;font-size:16px;color:#fff;
+    background:linear-gradient(135deg,#ff6b9d,#a78bfa);
+    box-shadow:0 14px 32px rgba(255,107,157,.38);
+    transition:transform .2s, box-shadow .2s, filter .2s;
+  }
+  .btn-primary:active{transform:scale(.965);}
+  .btn-primary.running{
+    background:linear-gradient(135deg,#a78bfa,#6d5bd0);
+    box-shadow:0 14px 32px rgba(167,139,250,.35);
+  }
+  .btn-ghost{
+    padding:16px 22px;border-radius:999px;cursor:pointer;font-family:inherit;
+    font-weight:600;font-size:14.5px;color:rgba(255,255,255,.8);
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+    transition:.22s;
+  }
+  .btn-ghost:active{transform:scale(.96);background:rgba(255,255,255,.13);}
+
+  /* ---------- TOAST ---------- */
+  .toast-area{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:30px;z-index:60;
+    display:flex;flex-direction:column;gap:10px;align-items:center;
+    pointer-events:none;width:max-content;max-width:92vw;
+  }
+  .toast{
+    padding:13px 24px;border-radius:999px;
+    background:linear-gradient(135deg, rgba(255,107,157,.96), rgba(167,139,250,.96));
+    color:#fff;font-weight:700;font-size:14px;letter-spacing:.2px;
+    box-shadow:0 16px 38px rgba(255,107,157,.45), inset 0 1px 0 rgba(255,255,255,.35);
+    animation:toastIn .55s cubic-bezier(.2,1.3,.4,1) both;
+    white-space:nowrap;
+  }
+  .toast.out{animation:toastOut .45s ease forwards;}
+  @keyframes toastIn{
+    from{opacity:0;transform:translateY(28px) scale(.8);}
+    to{opacity:1;transform:none;}
+  }
+  @keyframes toastOut{
+    to{opacity:0;transform:translateY(-16px) scale(.9);}
+  }
+
+  @media (max-width:380px){
+    .pin-input{width:50px;height:62px;font-size:24px;border-radius:17px;}
+    .pin-wrap{gap:9px;}
+    #timeDisplay{font-size:40px;}
+    .mc-icon{font-size:34px;}
+    .letter{font-size:14.5px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="hearts"></div>
+
+<div id="app">
+
+  <!-- ============ KİLİT EKRANI ============ -->
+  <section id="lockScreen" class="screen active">
+    <div class="card lock-card">
+      <div class="lock-heart">❤️</div>
+      <h1>Bizim Uygulamamız</h1>
+      <p class="sub">Girmek için özel kodu gir</p>
+
+      <div class="pin-wrap">
+        <input class="pin-input" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="1. hane">
+        <input class="pin-input" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="2. hane">
+        <input class="pin-input" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="3. hane">
+        <input class="pin-input" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="4. hane">
+      </div>
+
+      <p class="error" id="errorMsg">Yanlış kod, tekrar dene 💔</p>
+    </div>
+  </section>
+
+  <!-- ============ MENÜ ============ -->
+  <section id="menuScreen" class="screen">
+    <div class="menu-head">
+      <h2>Hoş geldin aşkım 💕</h2>
+      <p>Ne yapmak istersin?</p>
+    </div>
+    <div class="menu-grid">
+      <button class="menu-card" data-go="noteScreen">
+        <span class="mc-icon">💌</span>
+        <span class="mc-title">Not</span>
+        <span class="mc-desc">Sana bir mektubum var</span>
+      </button>
+      <button class="menu-card" data-go="pomodoroScreen">
+        <span class="mc-icon">🍅</span>
+        <span class="mc-title">Pomodoro</span>
+        <span class="mc-desc">Birlikte odaklanalım</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ MEKTUP ============ -->
+  <section id="noteScreen" class="screen">
+    <div class="card note-card">
+      <div class="note-seal">💌</div>
+      <div class="letter" id="letterText"></div>
+    </div>
+    <button class="back-btn" data-go="menuScreen">← Geri dön</button>
+  </section>
+
+  <!-- ============ POMODORO ============ -->
+  <section id="pomodoroScreen" class="screen">
+    <div class="card pomo-card">
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="work">Odak</button>
+        <button class="mode-tab" data-mode="short">Kısa Mola</button>
+        <button class="mode-tab" data-mode="long">Uzun Mola</button>
+      </div>
+
+      <div class="timer-wrap">
+        <svg class="ring" viewBox="0 0 260 260">
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff6b9d"/>
+              <stop offset="100%" stop-color="#a78bfa"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="130" cy="130" r="115"/>
+          <circle class="ring-fg" id="ringFg" cx="130" cy="130" r="115"/>
+        </svg>
+        <div class="timer-inner">
+          <div id="timeDisplay">25:00</div>
+          <div id="timerLabel">Odak zamanı 🍅</div>
+        </div>
+      </div>
+
+      <div class="dots">
+        <span class="note-dot"></span>
+        <span class="note-dot"></span>
+        <span class="note-dot"></span>
+        <span class="note-dot"></span>
+      </div>
+
+      <div class="pomo-controls">
+        <button id="startBtn" class="btn-primary">Başlat</button>
+        <button id="resetBtn" class="btn-ghost">Sıfırla</button>
+      </div>
+    </div>
+    <button class="back-btn" data-go="menuScreen">← Geri dön</button>
+  </section>
+
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script>
+/* ==========================================================
+   1) UÇAN KALPLER
+   ========================================================== */
+(function makeHearts(){
+  const box = document.getElementById('hearts');
+  const emojis = ['❤️','💕','💗','🌸','✨','💖'];
+  for (let i = 0; i < 18; i++){
+    const s = document.createElement('span');
+    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left = Math.random()*100 + '%';
+    s.style.fontSize = (12 + Math.random()*20) + 'px';
+    s.style.animationDuration = (11 + Math.random()*14) + 's';
+    s.style.animationDelay = (-Math.random()*22) + 's';
+    box.appendChild(s);
+  }
+})();
+
+/* ==========================================================
+   2) EKRAN YÖNETİMİ
+   ========================================================== */
+const screens = document.querySelectorAll('.screen');
+
+function showScreen(id){
+  screens.forEach(s => s.classList.toggle('active', s.id === id));
+  if (id === 'noteScreen') playLetter();
+}
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-go]');
+  if (!btn) return;
+  showScreen(btn.dataset.go);
+});
+
+/* ==========================================================
+   3) ŞİFRE EKRANI
+   ========================================================== */
+const CORRECT_CODE = '0514';
+const pinInputs = [...document.querySelectorAll('.pin-input')];
+const errorMsg  = document.getElementById('errorMsg');
+const lockCard  = document.querySelector('.lock-card');
+let locked = false;
+
+pinInputs.forEach((inp, i) => {
+  inp.addEventListener('input', () => {
+    inp.value = inp.value.replace(/\D/g, '').slice(-1);
+    inp.classList.toggle('filled', !!inp.value);
+    if (inp.value && i < pinInputs.length - 1) pinInputs[i+1].focus();
+    if (pinInputs.every(p => p.value)) checkPin();
+  });
+
+  inp.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && !inp.value && i > 0){
+      pinInputs[i-1].focus();
+      pinInputs[i-1].value = '';
+      pinInputs[i-1].classList.remove('filled');
+    }
+  });
+
+  inp.addEventListener('focus', () => inp.select());
+});
+
+function checkPin(){
+  if (locked) return;
+  const val = pinInputs.map(p => p.value).join('');
+
+  if (val === CORRECT_CODE){
+    locked = true;
+    errorMsg.classList.remove('show');
+    if (navigator.vibrate) navigator.vibrate(45);
+    lockCard.classList.add('unlocking');
+
+    setTimeout(() => {
+      lockCard.classList.remove('unlocking');
+      pinInputs.forEach(p => { p.value = ''; p.classList.remove('filled'); });
+      showScreen('menuScreen');
+      locked = false;
+    }, 640);
+
+  } else {
+    errorMsg.classList.add('show');
+    lockCard.classList.remove('shake');
+    void lockCard.offsetWidth;
+    lockCard.classList.add('shake');
+    if (navigator.vibrate) navigator.vibrate([35, 70, 35]);
+
+    setTimeout(() => {
+      pinInputs.forEach(p => { p.value = ''; p.classList.remove('filled'); });
+      pinInputs[0].focus();
+    }, 420);
+  }
+}
+
+/* ==========================================================
+   4) MEKTUP
+   ========================================================== */
+const LETTER = [
+  { t: 'Sevgilim,', c: 'line greet' },
+  { t: 'Daha dün gibi ama bir yandan da sanki hep hayatımdaymışsın gibi geçen kocaman bir ay oldu. İnsan doğru kişiyle olunca zamanın nasıl aktığını gerçekten anlamıyormuş, seninle geçirdiğim her günde bunu tekrar anladım.', c: 'line' },
+  { t: 'Hayatımda olduğun, yüzümü her gün bir şekilde güldürdüğün ve bana bu kadar iyi geldiğin için çok teşekkür ederim. İyi ki yollarımız kesişmiş, iyi ki yanımdasın.', c: 'line' },
+  { t: 'İlk ayımız kutlu olsun, birlikte geçireceğimiz daha çok güzel günlere… Seni çok seviyorum. ❤️', c: 'line sign' }
+];
+
+const letterEl = document.getElementById('letterText');
+
+function playLetter(){
+  letterEl.innerHTML = '';
+  LETTER.forEach((item, i) => {
+    const p = document.createElement('p');
+    p.className = item.c;
+    p.textContent = item.t;
+    p.style.animationDelay = (0.3 + i * 0.85) + 's';
+    letterEl.appendChild(p);
+  });
+  const card = document.querySelector('.note-card');
+  if (card) card.scrollTop = 0;
+}
+
+/* ==========================================================
+   5) POMODORO
+   ========================================================== */
+const MODES = {
+  work:  { label: 'Odak zamanı 🍅',  secs: 25 * 60 },
+  short: { label: 'Kısa mola ☕',    secs: 5  * 60 },
+  long:  { label: 'Uzun mola 🌿',   secs: 15 * 60 }
+};
+
+const MINI_NOTES = [
+  'Seni daha çok seviyorum ❤️',
+  'İyi ki varsın 🌸',
+  'Her saniye biraz daha… ✨',
+  'Bir ömür seninle 💫'
+];
+
+/* Notların çıkacağı anlar (ilerleme yüzdesi) */
+const NOTE_THRESHOLDS = [0.05, 0.25, 0.50, 0.75];
+
+const RING_C = 2 * Math.PI * 115;
+
+const ringFg      = document.getElementById('ringFg');
+const timeDisplay = document.getElementById('timeDisplay');
+const timerLabel  = document.getElementById('timerLabel');
+const startBtn    = document.getElementById('startBtn');
+const resetBtn    = document.getElementById('resetBtn');
+const toastArea   = document.getElementById('toastArea');
+const dots        = [...document.querySelectorAll('.note-dot')];
+
+let mode      = 'work';
+let total     = MODES[mode].secs;
+let remaining = total;
+let running   = false;
+let endTime   = 0;
+let tickId    = null;
+const fired   = new Set();
+
+ringFg.style.strokeDasharray = RING_C;
+
+function render(){
+  const totalSec = Math.max(0, Math.ceil(remaining));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  timeDisplay.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+  const progress = 1 - (remaining / total);
+  ringFg.style.strokeDashoffset = RING_C * Math.min(1, Math.max(0, progress));
+}
+
+function updateDots(){
+  dots.forEach((d, i) => d.classList.toggle('lit', fired.has(i)));
+}
+
+function showToast(text){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = text;
+  toastArea.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('out');
+    setTimeout(() => t.remove(), 460);
+  }, 5200);
+}
+
+function checkNotes(){
+  const progress = 1 - (remaining / total);
+  NOTE_THRESHOLDS.forEach((th, i) => {
+    if (progress >= th && !fired.has(i)){
+      fired.add(i);
+      updateDots();
+      showToast(MINI_NOTES[i]);
+      if (navigator.vibrate) navigator.vibrate(25);
+    }
+  });
+}
+
+function tick(){
+  remaining = Math.max(0, (endTime - Date.now()) / 1000);
+  render();
+  checkNotes();
+  if (remaining <= 0) finishTimer();
+}
+
+function startTimer(){
+  if (running) return;
+  if (remaining <= 0.2) remaining = total;
+  running = true;
+  endTime = Date.now() + remaining * 1000;
+  tickId = setInterval(tick, 200);
+  startBtn.textContent = 'Duraklat';
+  startBtn.classList.add('running');
+}
+
+function pauseTimer(){
+  if (!running) return;
+  running = false;
+  clearInterval(tickId);
+  tickId = null;
+  startBtn.textContent = 'Devam Et';
+  startBtn.classList.remove('running');
+}
+
+function resetTimer(){
+  pauseTimer();
+  remaining = total;
+  fired.clear();
+  updateDots();
+  startBtn.textContent = 'Başlat';
+  render();
+}
+
+function finishTimer(){
+  pauseTimer();
+  remaining = 0;
+  render();
+  startBtn.textContent = 'Başlat';
+  startBtn.classList.remove('running');
+  showToast('Süre doldu! Seni çok seviyorum ❤️');
+  if (navigator.vibrate) navigator.vibrate([60, 80, 60, 80, 120]);
+}
+
+function setMode(newMode){
+  mode = newMode;
+  total = MODES[mode].secs;
+  remaining = total;
+  pauseTimer();
+  fired.clear();
+  updateDots();
+  startBtn.textContent = 'Başlat';
+  startBtn.classList.remove('running');
+  timerLabel.textContent = MODES[mode].label;
+  document.querySelectorAll('.mode-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.mode === mode)
+  );
+  render();
+}
+
+startBtn.addEventListener('click', () => {
+  running ? pauseTimer() : startTimer();
+});
+
+resetBtn.addEventListener('click', resetTimer);
+
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => setMode(tab.dataset.mode));
+});
+
+/* Başlangıç */
+setMode('work');
+</script>
+</body>
+</html>
